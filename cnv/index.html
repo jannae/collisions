@@ -12,6 +12,34 @@
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" language="javascript" src="./_js/processing-1.3.6.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect();
+        var iosData = {};
+        var users = {};
+        var user;
+        
+        var cleanStr = function(str) {
+            str = str.replace(/\s+/g, '');
+            str = str.replace(/,/g, '');
+            str = str.replace(/\./g, '');
+            str = str.toLowerCase();    
+            return str;
+        }
+            
+    	// listener, whenever the server emits 'updateusers', this updates the username list
+    	socket.on('updateusers', function(data) {
+    		$('#printUsers').empty();
+            $('#printData').empty();
+    		$.each(data, function(key, value) {
+                users[key] = value;
+                user = cleanStr(value);
+                $('<div/>', {'id' : 'data-'+user } ).appendTo('#printData');
+                /* not working.  :(
+                $('<div/>', {'id' : 'user-'+user } ).appendTo('#printUsers');
+                $('#user-'+user, {html : 'hello '+value} ).appendTo('#printUsers');*/
+    		});
+    	});
+    </script>
 
 	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
 	</head>
@@ -19,6 +47,7 @@
 		<div id="header"><img src="./_img/iphone.png" width="75"/><h1>http://jann.ae/collide</h1></div>
 		<div id="mainContent">
 			<div id="printData"></div>
+            <div id="printUsers"></div>
 		    <script id="sketch" type="application/processing" src="./_js/collide.js"></script>
 			<canvas id="run">
 				<p>Your browser does not support the canvas tag.</p>

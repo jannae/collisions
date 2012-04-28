@@ -1,6 +1,3 @@
-var socket = io.connect();
-var iosData = {};
-
 int bot = document.getElementById('sources').offsetHeight;
 int top = document.getElementById('header').offsetHeight;
 int cnvW = window.innerWidth;
@@ -16,6 +13,17 @@ float edge = r-(strokeW/2);
 int X, Y; // for initial positioning
 int s; // stabilization
 float nX, nY, nZ, gA, gB, gG, arA, arB, arG;
+
+socket.on('update', function(username, data) {
+    user = cleanStr(username);
+    
+    divTxt  = "<p>User : " + user + "</p>";
+    $.each(data, function(key, value){
+        iosData[key] = parseFloat(value);
+        divTxt += "<p>"+key+" : " + parseFloat(value) + "</p>";
+    });
+    $('#data-'+user).html(divTxt);
+});	
 
 
 void setup() {
@@ -36,34 +44,22 @@ void draw() {
 	noStroke();
 	fill(10, 40);
 	rect(0, 0, width, height);
-	iphoneControl();
-}
+    
+    nX = iosData['x'];
+    nY = iosData['y'];
+    nZ = iosData['z'];
+    //r = abs(nZ)*10;  // possibly for 3D effect?
+    
+    gA = iosData['a'];
+    gB = iosData['b'];
+    gG = iosData['g'];
+    
+    arA = iosData['ar'] / 100;
+    arB = iosData['br'] / 100;
+    arG = iosData['gr'] / 100;
+    
+    s = int(iosData['s']);
 
-void iphoneControl() {
-    socket.on('desktop', function(data) {
-        $.each(data, function(i, item){                    
-            $.each(item[0], function(key, value){
-                iosData[key] = parseFloat(value);
-                nX = iosData['x'];
-                nY = iosData['y'];
-                nZ = iosData['z'];
-                //r = abs(nZ)*10;  // possibly for 3D effect?
-                
-                gA = iosData['a'];
-                gB = iosData['b'];
-                gG = iosData['g'];
-                
-                arA = iosData['ar'] / 100;
-                arB = iosData['br'] / 100;
-                arG = iosData['gr'] / 100;
-                
-                s = int(iosData['s']);
-            });
-        });                
-    });
-	
-	printData(nX, nY, nZ, gA, gB, gG, arA, arB, arG, s);
-	
 	PVector moved = new PVector(nX, nY);
 	PVector accel = new PVector(0,0);
 	
@@ -139,9 +135,16 @@ class Mover {
 	}
 }
 
-void printData(float x, float y, float z, float a, float b, float g, float alph, float bet, float gam, int stab) {
-	divTxt  = "<p>X : " + x + "</p>";
-	divTxt += "<p>Y : " + y + "</p>";
+void printData(u, data) {
+    divTxt  = "<p>User : " + u + "</p>";
+    console.log('data: '+data['x']);
+    $.each(data, function(key, value){
+        console.log(key);
+	    divTxt += "<p>"+key+" : " + value + "</p>";
+    });
+	/*
+    
+    divTxt += "<p>Y : " + y + "</p>";
 	divTxt += "<p>Z : " + z + "</p>";
 	divTxt += "<p>A : " + a + "</p>";
 	divTxt += "<p>B : " + b + "</p>";
@@ -150,7 +153,10 @@ void printData(float x, float y, float z, float a, float b, float g, float alph,
 	divTxt += "<p>arB : " + bet + "</p>";
 	divTxt += "<p>arG : " + gam + "</p>";
 	if (stab == 1) { divTxt += "<p>Stabilized!</p>"; }
-	document.getElementById("printData").innerHTML = divTxt;
+    $('<div/>', { 'id' : user}).appendTo('#printData');
+    $('#'+user).html(divTxt);
+	//$('#'+user).html(divTxt);*/
+    $('#printData').html(divTxt);
 } 
 
 /* notes for later, gator: 

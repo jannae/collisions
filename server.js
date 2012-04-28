@@ -15,6 +15,8 @@ function handler(req, res) {
     
     if(/mobile/i.test(ua)) {
         fpath = '/mob/index.html';
+    } else if (url_parts.pathname == '/test') {
+        fpath = '/_test/index.html';
     } else {
         fpath = '/cnv/index.html';
     }
@@ -33,13 +35,6 @@ function handler(req, res) {
             contentType = 'image/png';
             break;
     }
-    /*
-    console.log(url_parts);
-    if(url_parts.pathname == '/main.css') { 
-        console.log(url_parts.href);
-        fpath = url_parts.href; 
-        contentType = 'text/css';
-    }  */
     
     fs.readFile(__dirname + fpath, function(err, data) {
         if (err) {
@@ -50,6 +45,8 @@ function handler(req, res) {
         res.end(data);
     });
 }
+
+/* original WORKING socket.io code
 
 io.sockets.on('connection', function(socket) {
     console.log('connected');
@@ -62,4 +59,52 @@ io.sockets.on('connection', function(socket) {
             return; // continue
         }
     });
+});
+
+    // when the client emits 'sendchat', this listens and executes
+    socket.on('sendchat', function (data) {
+		// we tell the client to execute 'updatechat' with 2 parameters
+		io.sockets.emit('updatechat', socket.username, data);
+	});
+
+*/
+// code modified from socket/node chat tutorial: http://psitsmike.com/2011/09/node-js-and-socket-io-chat-tutorial/
+// usernames which are currently connected
+var usernames = {};
+
+io.sockets.on('connection', function (socket) {
+    console.log('connected');
+    
+    socket.on('sendData', function(data) {
+        try {       
+            io.sockets.emit('update', socket.username, data);
+        } catch (Err) {
+            console.log('skipping: ' + Err);
+            return; // continue
+        }
+    });
+
+	// when the client emits 'adduser', this listens and executes
+	socket.on('adduser', function(username){
+		// we store the username in the socket session for this client
+		socket.username = username;
+		// add the client's username to the global list
+		usernames[username] = username;
+		// echo to client they've connected
+		socket.emit('update', 'SERVER', 'you have connected');
+		// echo globally (all clients) that a person has connected
+		socket.broadcast.emit('update', 'SERVER', username + ' has connected');
+		// update the list of users in app, client-side
+		io.sockets.emit('updateusers', usernames);
+	});
+
+	// when the user disconnects.. perform this
+	socket.on('disconnect', function(){
+		// remove the username from global usernames list
+		delete usernames[socket.username];
+		// update list of users in app, client-side
+		io.sockets.emit('updateusers', usernames);
+		// echo globally that this client has left
+		socket.broadcast.emit('update', 'SERVER', socket.username + ' has disconnected');
+	});
 });
