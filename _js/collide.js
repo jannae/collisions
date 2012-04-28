@@ -14,15 +14,16 @@ int X, Y; // for initial positioning
 int s; // stabilization
 float nX, nY, nZ, gA, gB, gG, arA, arB, arG;
 
-socket.on('update', function(username, data) {
-    user = cleanStr(username);
+socket.on('update', function(username, userdata, data) {
+    var user = cleanStr(username);
+    var color = userdata;
     
     divTxt  = "<p>User : " + user + "</p>";
     $.each(data, function(key, value){
         iosData[key] = parseFloat(value);
         divTxt += "<p>"+key+" : " + parseFloat(value) + "</p>";
     });
-    $('#data-'+user).html(divTxt);
+    $('#data-'+user).html(divTxt).css('color',color);
 });	
 
 
@@ -134,30 +135,6 @@ class Mover {
 		}
 	}
 }
-
-void printData(u, data) {
-    divTxt  = "<p>User : " + u + "</p>";
-    console.log('data: '+data['x']);
-    $.each(data, function(key, value){
-        console.log(key);
-	    divTxt += "<p>"+key+" : " + value + "</p>";
-    });
-	/*
-    
-    divTxt += "<p>Y : " + y + "</p>";
-	divTxt += "<p>Z : " + z + "</p>";
-	divTxt += "<p>A : " + a + "</p>";
-	divTxt += "<p>B : " + b + "</p>";
-	divTxt += "<p>G : " + g + "</p>";
-	divTxt += "<p>arA : " + alph + "</p>";
-	divTxt += "<p>arB : " + bet + "</p>";
-	divTxt += "<p>arG : " + gam + "</p>";
-	if (stab == 1) { divTxt += "<p>Stabilized!</p>"; }
-    $('<div/>', { 'id' : user}).appendTo('#printData');
-    $('#'+user).html(divTxt);
-	//$('#'+user).html(divTxt);*/
-    $('#printData').html(divTxt);
-} 
 
 /* notes for later, gator: 
 	http://ditio.net/2008/11/04/php-string-to-hex-and-hex-to-string-functions/

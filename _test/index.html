@@ -43,8 +43,13 @@
                 
             	var name = $('#name').val();
     			$('#name').val('');
-    			// tell server to execute 'sendchat' and send along one parameter
-    			socket.emit('adduser', name);
+                
+    			r = random(0,255);
+                g = random(0,255);
+                b = random(0,255);
+                userdata = 'rgb('+r+','+g+','+b+')';                
+                
+        		socket.emit('adduser', name, userdata);
                 
                 setInterval(function() {
                     testData();

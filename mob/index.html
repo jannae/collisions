@@ -18,6 +18,8 @@
         var socket = io.connect();
     	        
         var iosData = {};
+        
+        var userdata,r,g,b;
 	    	
 	    $(document).ready(function() {
             $('#broadcast').hide();
@@ -28,8 +30,14 @@
                 
         		var name = $('#name').val();
     			$('#name').val('');
-    			// tell server to execute 'sendchat' and send along one parameter
-    			socket.emit('adduser', name);
+                
+                /*r = random(0,255);
+                g = random(0,255);
+                b = random(0,255);
+                userdata = 'rgb('+r+','+g+','+b+')';*/
+                userdata = '#'+((1<<24)*Math.random()|0).toString(16);
+                
+    			socket.emit('adduser', name, userdata);
 		    
     	        window.addEventListener("devicemotion", onDeviceMotion, false);
     	        window.addEventListener("deviceorientation", ondeviceorientation, false);
@@ -105,6 +113,10 @@
             
             socket.emit('sendData', iosjson );
 	    }
+        
+        function random (min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
 	</script>
 
 	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->

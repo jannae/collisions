@@ -46,28 +46,6 @@ function handler(req, res) {
     });
 }
 
-/* original WORKING socket.io code
-
-io.sockets.on('connection', function(socket) {
-    console.log('connected');
-    
-    socket.on('mobile', function(data) {
-        try {       
-            io.sockets.emit('desktop', data);
-        } catch (Err) {
-            console.log('skipping: ' + Err);
-            return; // continue
-        }
-    });
-});
-
-    // when the client emits 'sendchat', this listens and executes
-    socket.on('sendchat', function (data) {
-		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.emit('updatechat', socket.username, data);
-	});
-
-*/
 // code modified from socket/node chat tutorial: http://psitsmike.com/2011/09/node-js-and-socket-io-chat-tutorial/
 // usernames which are currently connected
 var usernames = {};
@@ -77,7 +55,7 @@ io.sockets.on('connection', function (socket) {
     
     socket.on('sendData', function(data) {
         try {       
-            io.sockets.emit('update', socket.username, data);
+            io.sockets.emit('update', socket.username, socket.userdata, data);
         } catch (Err) {
             console.log('skipping: ' + Err);
             return; // continue
@@ -85,9 +63,13 @@ io.sockets.on('connection', function (socket) {
     });
 
 	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', function(username){
-		// we store the username in the socket session for this client
-		socket.username = username;
+	socket.on('adduser', function(username, userdata){
+		// we store the username in the socket session for this client        
+        if (usernames[username]) {
+            username = username+'_';
+        }
+        socket.username = username;
+        socket.userdata = userdata;
 		// add the client's username to the global list
 		usernames[username] = username;
 		// echo to client they've connected
