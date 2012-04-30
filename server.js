@@ -78,7 +78,15 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.emit('update', 'SERVER', username + ' has connected');
 		// update the list of users in app, client-side
 		io.sockets.emit('updateusers', usernames);
+        io.sockets.emit('useradded', username, userdata);
 	});
+    
+    socket.on('kill', function(username) {
+        delete usernames[socket.username];
+        console.log('killing'+username);
+        io.sockets.emit('updateusers', usernames);
+        io.sockets.emit('killed', username);
+    });
 
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function(){

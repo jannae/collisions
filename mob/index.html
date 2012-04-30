@@ -9,6 +9,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>Collide.</title>
 
+    <link rel="stylesheet" type="text/css" href="./_css/reset.css">
     <link rel="stylesheet" type="text/css" href="./_css/main.css">
     
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -20,6 +21,17 @@
         var iosData = {};
         
         var userdata,r,g,b;
+        var x, y, z; // Position Variables for 
+	    var vx, vy, vz; // Speed - Velocity
+	    var ax, ay, az; // Acceleration
+	    var ai; // data reporting interval (event.interval)
+	    var arAlpha, arBeta, arGamma; // rotation acceleration angles
+	    var delay = 100;
+	    var vMultiplier = 0.01;
+	    var alpha = 0;
+	    var beta = 0;
+	    var gamma = 0;
+	    var stabilize = 0;
 	    	
 	    $(document).ready(function() {
             $('#broadcast').hide();
@@ -31,11 +43,17 @@
         		var name = $('#name').val();
     			$('#name').val('');
                 
-                /*r = random(0,255);
+                //code for random rgb colors
+                r = random(0,255);
                 g = random(0,255);
                 b = random(0,255);
-                userdata = 'rgb('+r+','+g+','+b+')';*/
-                userdata = '#'+((1<<24)*Math.random()|0).toString(16);
+                //userdata = 'rgb('+r+','+g+','+b+')';
+                userdata = {'r': r, 'g':g, 'b':b};
+                
+                /*//code for random hex colors
+                userdata = ((1<<24)*Math.random()|0).toString(16);
+                $('<h2/>',{html:name}).css('color','#'+userdata).appendTo('#header');*/
+                $('#header h2').html(name).css('color','rgb('+r+','+g+','+b+')');
                 
     			socket.emit('adduser', name, userdata);
 		    
@@ -43,19 +61,13 @@
     	        window.addEventListener("deviceorientation", ondeviceorientation, false);
     	        window.addEventListener("touchstart", touchHandler, false);
             });
+            $('#sendquit').click( function() {
+                socket.disconnect();
+                $('#signin').show();
+                $('#broadcast').hide();
+                $('#header h2').empty();
+            });
 	    });
-	
-	    var x, y, z; // Position Variables for 
-	    var vx, vy, vz; // Speed - Velocity
-	    var ax, ay, az; // Acceleration
-	    var ai; // data reporting interval (event.interval)
-	    var arAlpha, arBeta, arGamma; // rotation acceleration angles
-	    var delay = 100;
-	    var vMultiplier = 0.01;
-	    var alpha = 0;
-	    var beta = 0;
-	    var gamma = 0;
-	    var stabilize = 0;
 	
 	    function ondeviceorientation(event) {
 	        alpha = event.alpha.toFixed(2);
@@ -131,6 +143,7 @@
       <div class="box" id="accel"> <span class="head">Accelerometer</span> <span id="x"></span> <span id="y"></span> <span id="z"></span> <span id="i"></span> <span id="ar"></span> <span id="br"></span> <span id="gr"></span> </div>
       <div class="box" id="gyro"> <span class="head">Gyroscope</span> <span id="a"></span> <span id="b"></span> <span id="g"></span> </div>
       <div class="clear"></div>
+      <input id="sendquit" type="button"  value="quit" />
     </div>
 </body>
 </html>

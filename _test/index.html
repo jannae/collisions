@@ -44,19 +44,43 @@
             	var name = $('#name').val();
     			$('#name').val('');
                 
-    			r = random(0,255);
+    			//code for random rgb colors
+                r = random(0,255);
                 g = random(0,255);
                 b = random(0,255);
-                userdata = 'rgb('+r+','+g+','+b+')';                
+                //userdata = 'rgb('+r+','+g+','+b+')';
+                userdata = {'r': r, 'g':g, 'b':b};
+                
+                /*//code for random hex colors
+                userdata = ((1<<24)*Math.random()|0).toString(16);
+                $('#header h2',{html:name}).css('color','#'+userdata).appendTo('#header');*/
+                $('#header h2').html(name).css('color','rgb('+r+','+g+','+b+')');
                 
         		socket.emit('adduser', name, userdata);
                 
+                socket.on('killed', function(username) {
+                    if(username == name) {
+                        sockexit();
+                    }
+                });
+                
                 setInterval(function() {
                     testData();
-                }, delay); 
-                
+                }, delay);
+            });
+            
+            
+            $('#sendquit').click( function() {
+                sockexit();
             });
 	    });
+        
+        function sockexit() {
+            socket.disconnect();
+            $('#signin').show();
+            $('#broadcast').hide();
+            $('#header h2').empty();
+        }
 	
 	    function testData() {
             	
@@ -75,7 +99,6 @@
 	        arGamma = random(-360,360);
 			    	
 	        var iosjson = {
-	                'go': 1,
 	                'x': ax,
 	                'y': ay,
 	                'z': az,
@@ -117,6 +140,7 @@
 <body>
     <div id="header">
       <h1>Collide-TEST.</h1>
+      <h2></h2>
     </div>
     <div id="signin">
         <input id="name" />
@@ -126,6 +150,7 @@
       <div class="box" id="accel"> <span class="head">Accelerometer</span> <span id="x"></span> <span id="y"></span> <span id="z"></span> <span id="i"></span> <span id="ar"></span> <span id="br"></span> <span id="gr"></span> </div>
       <div class="box" id="gyro"> <span class="head">Gyroscope</span> <span id="a"></span> <span id="b"></span> <span id="g"></span> </div>
       <div class="clear"></div>
+      <input id="sendquit" type="button"  value="quit" />
     </div>
 </body>
 </html>
