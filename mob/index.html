@@ -59,7 +59,7 @@
 		    
     	        window.addEventListener("devicemotion", onDeviceMotion, false);
     	        window.addEventListener("deviceorientation", ondeviceorientation, false);
-    	        window.addEventListener("touchstart", touchHandler, false);
+    	        window.addEventListener("touchend", touchHandler, false);
             });
             $('#sendquit').click( function() {
                 socket.disconnect();

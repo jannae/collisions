@@ -14,6 +14,8 @@
     
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     
+    <script type="text/javascript" language="javascript" src="./_js/processing-1.3.6.min.js"></script>
+    
 	<script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
     
@@ -31,7 +33,11 @@
 	    var gamma = 0;
 	    var stabilize = 0;
         var delay = 100;
-    	        
+        //code for random rgb colors
+        var r = random(0,255);
+        var g = random(0,255);
+        var b = random(0,255);
+
         var iosData = {};
 	    	
         $(document).ready(function() {
@@ -44,13 +50,9 @@
             	var name = $('#name').val();
     			$('#name').val('');
                 
-    			//code for random rgb colors
-                r = random(0,255);
-                g = random(0,255);
-                b = random(0,255);
                 //userdata = 'rgb('+r+','+g+','+b+')';
                 userdata = {'r': r, 'g':g, 'b':b};
-                
+                                
                 /*//code for random hex colors
                 userdata = ((1<<24)*Math.random()|0).toString(16);
                 $('#header h2',{html:name}).css('color','#'+userdata).appendTo('#header');*/
@@ -68,7 +70,6 @@
                     testData();
                 }, delay);
             });
-            
             
             $('#sendquit').click( function() {
                 sockexit();
@@ -151,6 +152,33 @@
       <div class="box" id="gyro"> <span class="head">Gyroscope</span> <span id="a"></span> <span id="b"></span> <span id="g"></span> </div>
       <div class="clear"></div>
       <input id="sendquit" type="button"  value="quit" />
+        <canvas id="run" style="position:absolute">
+        <script id="sketch" type="application/processing">
+            var top = document.getElementById('header').offsetHeight;
+            var cnvW = window.innerWidth;
+            var cnvH = window.innerHeight - top;
+            document.getElementById('run').style.top = top;
+            
+            console.log(top+', cnvW: '+cnvW+', cnvH: '+cnvH);
+            float radius = 50.0;
+            color blobby = color(r,g,b);
+            void setup(){
+                size(cnvW, cnvH);
+                strokeWeight( 10 );
+            }
+            void draw(){
+              radius = radius + sin( frameCount / 4 );
+              background(0);
+              fill(blobby);
+              stroke(255);
+              ellipse( width / 2, width / 2, radius, radius );                  
+            }
+        </script>
+        	<p>Your browser does not support the canvas tag.</p>
+        </canvas>
+        <noscript>
+        	<p>JavaScript is required to view the contents of this page.</p>
+        </noscript>
     </div>
 </body>
 </html>

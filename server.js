@@ -73,16 +73,16 @@ io.sockets.on('connection', function (socket) {
 		// add the client's username to the global list
 		usernames[username] = username;
 		// echo to client they've connected
-		socket.emit('update', 'SERVER', 'you have connected');
+		socket.emit('update', username, userdata);
 		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit('update', 'SERVER', username + ' has connected');
+		socket.broadcast.emit('update', username, userdata);
 		// update the list of users in app, client-side
 		io.sockets.emit('updateusers', usernames);
         io.sockets.emit('useradded', username, userdata);
 	});
     
     socket.on('kill', function(username) {
-        delete usernames[socket.username];
+        delete usernames[username];
         console.log('killing'+username);
         io.sockets.emit('updateusers', usernames);
         io.sockets.emit('killed', username);
@@ -95,6 +95,9 @@ io.sockets.on('connection', function (socket) {
 		// update list of users in app, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
-		socket.broadcast.emit('update', 'SERVER', socket.username + ' has disconnected');
+		socket.broadcast.emit('update', socket.username + ' has disconnected');
 	});
 });
+
+//notes:  http://stackoverflow.com/questions/5048231/force-client-disconnect-from-server-with-socket-io-and-nodejs
+//        http://stackoverflow.com/questions/5965733/how-does-one-properly-shutdown-socket-io-websocket-client

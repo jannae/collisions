@@ -7,34 +7,20 @@ int cnvH = window.innerHeight - bot - top;
 document.getElementById('printData').style.top = top;
 document.getElementById('printData').style.height = cnvH+'px';
 
-function toHex(str) {
-    var hex = '';
-    for(var i=0;i<str.length;i++) {
-        hex += str.charCodeAt(i).toString(16);
-    }
-    return hex;
-    console.log('toHex='+hex);
-}
-
-var worldinfo = {};
 var blobcol = {};
 var user;
 var blobData = {};
+var worldinfo = {};
 
 World world;
-
-float r = 50.0;  //radius of blob
-float strokeW = 10;
-float edge = r-(strokeW/2);
-int X, Y; // for initial positioning
-int s; // stabilization
 float nX, nY, nZ, gA, gB, gG, arA, arB, arG;
+int s;
 
 color def = color(0,0,0);
 
 socket.on('update', function(username, userdata, data) {
     user = cleanStr(username);    
-    divTxt  = "<p>User : " + user + "</p>";
+    divTxt  = "<p>Blob : " + user + "</p>";
     $.each(data, function(key, value){
         iosData[key] = parseFloat(value);
         divTxt += "<p>"+key+" : " + parseFloat(value) + "</p>";
@@ -58,26 +44,28 @@ socket.on('useradded', function(username, userdata){
 void setup() {
     size(cnvW, cnvH);
     background(10);
-	//strokeWeight(strokeW);
 	world = new World(20, def);
 	smooth();
 }
 
 void draw() { 
-	//r = r + sin(frameCount / 4);
-
 	noStroke();
 	fill(10);
 	rect(0, 0, width*2, height*2);
 		
     socketData();
+    
+    if(s == 1) {
+        world.born(random(cnvW),random(cnvH),def,user);
+        s = 0;
+    }
   
 	world.run();
 }
 
 // We can add a creature manually if we so desire
 void mousePressed() {
-  world.born(mouseX,mouseY); 
+    world.born(mouseX,mouseY,def,'Blobby'); 
 }
 
 // Evolution EcoSystem
@@ -86,7 +74,7 @@ void mousePressed() {
 // Creature class
 
 class Blob {
-  PVector loc; 		// location
+  PVector loc,vel,acc;  // location
   DNA dna;          // DNA
   float health;     // Life timer
   float xoff;       // For perlin noise
@@ -104,16 +92,23 @@ class Blob {
   Blob(PVector l, DNA dna_, color c, String n) {
     loc = l.get();
     health = 200;
-    xoff = random(1000);
-    yoff = random(1000);
     dna = dna_;
     name = n;
     kids = 0;
+    
+    console.log(name+', '+user);
+    
+    if(name != user) {
+        xoff = random(1000);
+        yoff = random(1000);
+    }
     // Gene 0 determines maxspeed and r
     // The bigger the blob, the slower it is
     maxspeed = map(dna.genes[0], 0, 1, 15, 0);
-    r = map(dna.genes[0], 0, 1, 0, 50);
-	s = random(3,10);
+    r = map(dna.genes[0], 0, 1, 5, 50);
+	s = random(1,4);
+    
+    //if the color isn't user-defined
     if (c == def) {
         c = color(random(255),random(255),random(255));        
     }
@@ -121,6 +116,7 @@ class Blob {
   }
 
   void run() {
+    //flock(blobs);
     update();
     borders();
     display();
@@ -143,20 +139,28 @@ class Blob {
     }
   }
 
-  // At any moment there is a teeny, tiny chance a blob will reproduce
-  Blob reproduce() {
-    // asexual reproduction
+  // At any moment there is a teeny, tiny chance a blob will reproduce  
+  Blob reproduce(Blob mate) {
+    //sexual reproduction
+    /*kids++;
+    DNA childDNA = dna.crossover(mate.dna);
+    // Child DNA can mutate
+    childDNA.mutate(0.01);
+    return new Blob(loc, childDNA, fcolor, name);
+    console.log(name+' kid'+kids);*/
+
+    //asexual reproduction
     if (random(1) < 0.0005) {
         kids++;
-      // Child is exact copy of single parent
-      DNA childDNA = dna.copy();
-      // Child DNA can mutate
-      childDNA.mutate(0.01);
-      return new Blob(loc, childDNA, fcolor, name);
-      console.log(name+' kid'+kids);
+        // Child is exact copy of single parent
+        DNA childDNA = dna.copy();
+        // Child DNA can mutate
+        childDNA.mutate(0.01);
+        return new Blob(loc, childDNA, fcolor, name);
+        console.log(name+' kid'+kids);
     } 
     else {
-      return null;
+        return null;
     }
   }
 
@@ -164,6 +168,7 @@ class Blob {
   void update() {
     // Simple movement based on perlin noise
     float vx, vy;
+    // if this is a user-born object, control ourselves
     if(name == user){
         vx = nX;
         vy = nY;
@@ -196,8 +201,20 @@ class Blob {
     stroke(255,health);
     fill(fcolor, health);
     ellipse(loc.x, loc.y, r, r);
+    // eyes below!
+    strokeWeight(1);
+    fill(200, health+20);
+    ellipse(loc.x-(r/7), loc.y-(r/7), r/3.5, r/3);
+    ellipse(loc.x+(r/7), loc.y-(r/7), r/3.5, r/3);
+    fill(red(fcolor),0,0,health);
+    ellipse(loc.x, loc.y+(r/15), r/4, r/5.5);
+    fill(10);
+    ellipse(loc.x-(r/7), loc.y-(r/12), r/4, r/5);
+    ellipse(loc.x+(r/7), loc.y-(r/12), r/4, r/5);
+    
+    fill(fcolor, health);
     if(name != 'sys') {
-        text(name, loc.x-r, loc.y+r) 
+        text(name, loc.x-(r/2), loc.y-r) 
     }
   }
   
@@ -211,6 +228,10 @@ class Blob {
       return false;
     }
   }
+  
+    ArrayList getBlobs() {
+    return food;
+  }
 }
 
 // Evolution EcoSystem
@@ -221,27 +242,48 @@ class Blob {
 
 class DNA {
 
-  // The genetic sequence
-  float[] genes;
-  
-  // Constructor (makes a random DNA)
-  DNA() {
-    // DNA is random floating point values between 0 and 1 (!!)
-    genes = new float[1];
-    for (int i = 0; i < genes.length; i++) {
-      genes[i] = random(0,1);
+    // The genetic sequence
+    float[] genes;
+    float fitness;
+    
+    // Constructor (makes a random DNA)
+    DNA() {
+        // DNA is random floating point values between 0 and 1 (!!)
+        genes = new float[1];
+        for (int i = 0; i < genes.length; i++) {
+          genes[i] = random(0,1);
+        }
     }
-  }
+    
+    DNA(float[] newgenes) {
+        genes = newgenes;
+    }
+    
+    void fitness() {
+        int score = 0;
+        for (int i = 0; i < genes.length; i++) { 
+            //what is making these blobs "fit"??
+        }
+    }
   
-  DNA(float[] newgenes) {
-    genes = newgenes;
-  }
+    DNA copy() {
+        float[] newgenes = new float[genes.length];
+        arrayCopy(genes,newgenes);
+        return new DNA(newgenes);
+    }
   
-  DNA copy() {
-    float[] newgenes = new float[genes.length];
-    arrayCopy(genes,newgenes);
-    return new DNA(newgenes);
-  }
+    DNA crossover(DNA mate) {
+        float[] newgenes = new float[genes.length];
+        int midpoint = int(random(genes.length));
+        for(int i=0;i<genes.length;i++) {
+            if(i>midpoint) {
+                newgenes[i] = genes[i];
+            } else {
+                newgenes[i] = mate.genes[i];
+            }
+        }
+        return new DNA(newgenes);
+    }
   
   // Based on a mutation probability, picks a new random character in array spots
   void mutate(float m) {
@@ -320,7 +362,6 @@ class World {
   
   // Make a new creature
   void born(float x, float y, color col, String nm) {
-    console.log(x+', '+y+', '+col);
     PVector l = new PVector(x,y);
     DNA dna = new DNA();
     blobs.add(new Blob(l,dna,col,nm));
@@ -331,13 +372,19 @@ class World {
     // Deal with food
     food.run();
     
-    //$('#blobs').html(getBlobs().size()+' Blobs');    
-    //$('#foods').html(food.getFood().size()+' Foods');
-    
     // Cycle through the ArrayList backwards b/c we are deleting
     for (int i = blobs.size()-1; i >= 0; i--) {
       // All blobs run and eat
       Blob b = blobs.get(i);
+      //cycle through every other blob for sexual reproduction
+      /*for (int j = blobs.size()-1; j >= 0; j--) {
+          Blob m = blobs.get(j);
+          float d = PVector.dist(b.loc, m.loc);
+          
+          if (d < b.r/2 && d>0) {
+            Blob child = b.reproduce(m);
+          }
+      }*/
       b.run();
       b.eat(food);
       // If it's dead, kill it and make food
@@ -345,7 +392,7 @@ class World {
         blobs.remove(i);
         food.add(b.loc);
       }
-      // Perhaps this blob would like to make a baby?
+      // Asexual, random reproduction
       Blob child = b.reproduce();
       
       if (child != null) blobs.add(child);     
