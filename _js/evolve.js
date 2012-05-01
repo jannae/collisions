@@ -15,6 +15,7 @@ var worldData = {};
 
 World world;
 float nX, nY, nZ, gA, gB, gG, arA, arB, arG;
+//var nX, nY, nZ, gA, gB, gG, arA, arB, arG;
 int s;
 DNA blobgenes, click;
 
@@ -31,6 +32,7 @@ socket.on('update', function(username, userdata, data){
         blobDNA[key] = value;
         blobArr.push(value);
     });
+    
     $("#data-"+user).css("color","rgb("+parseInt(blobArr[1]*255)+","+parseInt(blobArr[2]*255)+","+parseInt(blobArr[3]*255)+")");
 }); 
 
@@ -40,9 +42,7 @@ socket.on('useradded', function(username, userdata){
         blobArr.push(value);
     });
     blobgenes = blobArr;
-    console.log('genes: '+blobgenes);
     world.born(random(cnvW),random(cnvH),blobgenes,cleanStr(username)); 
-    console.log('birthed :'+cleanStr(username));
 });
 
 void setup() {
@@ -84,6 +84,7 @@ class Blob {
   float xoff;           // For perlin noise
   float yoff;
   int kids;
+  int control;
   
   // DNA will determine size and maxspeed
   float r,s,sw;
@@ -95,7 +96,7 @@ class Blob {
   // Create a "blob" creature
   Blob(PVector l, DNA dna_, String n) {
     loc = l.get();
-    health = parseInt(random(150,235));
+    health = parseInt(random(150,255));
     dna = dna_;
     name = n;
     kids = 0;
@@ -132,7 +133,8 @@ class Blob {
       
       // If we are, juice up our strength!
       if (d < r/2) {
-        health += 100; 
+        health += 100;
+        status(name+' ate some food for '+parseInt(health)+' health');
         food.remove(i);
       }
     }
@@ -148,6 +150,9 @@ class Blob {
         //console.log(name+' has '+kids+' kids!');
         //console.log('parent 1: '+health+'; parent 2: '+mate.health);
         DNA childDNA = dna.crossover(mate.dna);
+        // give the parents a little life boost
+        health += random(50,100); 
+        mate.health += random(50,100); 
         // Child DNA can mutate
         childDNA.mutate(0.01);
         return new Blob(new PVector(random(width),random(height)), childDNA, 'sys');
@@ -161,7 +166,8 @@ class Blob {
     // Simple movement based on perlin noise
     float vx, vy;
     // if this is a user-born object, control ourselves
-    if(name == user){
+    if(users[name]){
+        console.log(name+' is controlled');
         vx = nX;
         vy = nY;
     } else { 
@@ -191,18 +197,19 @@ class Blob {
 
   // Method to display
   void display() {
+    h = map(health,0,400,0,255);
     ellipseMode(CENTER);
 	strokeWeight(s);
-    stroke(255,health);
-    fill(fcolor, health);
+    stroke(255,h);
+    fill(fcolor, h);
     ellipse(loc.x, loc.y, r, r);
     
     // eyes below!
     strokeWeight(1);
-    fill(200, health+20);
+    fill(200);
     ellipse(loc.x-(r/7), loc.y-(r/7), r/3.5, r/3);
     ellipse(loc.x+(r/7), loc.y-(r/7), r/3.5, r/3);
-    fill(red(fcolor),0,0,health);
+    fill(red(fcolor),0,0,h);
     ellipse(loc.x, loc.y+(r/15), r/4, r/5.5);
     fill(10);
     ellipse(loc.x-(r/7), loc.y-(r/12), r/4, r/5);
@@ -361,7 +368,6 @@ class World {
         DNA dna = new DNA();
     } else { DNA dna = new DNA(d); }
     blobs.add(new Blob(l,dna,nm));
-    console.log('add blob: '+nm);
   }
 
   // Run the world

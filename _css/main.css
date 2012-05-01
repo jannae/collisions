@@ -15,6 +15,7 @@ BODY {
 	box-shadow:inset 0 0 5px #000;
 	text-align: center;
     padding:5px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 #header img {
 	width: 50px;
@@ -25,7 +26,7 @@ BODY {
 }
 #header h1 { 
     line-height:1.9;
-    font-weight:700;
+    font-weight:500;
     font-size: 2.5em;
     display:inline;
 }
@@ -57,22 +58,24 @@ BODY {
     margin:10px auto;
 }
 #signin input {
-     margin:30px auto;
+     margin: 30px auto;
+    border-radius: 3px 3px 3px 3px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    border: 1px solid #999;
 }
 #name {
 }
-#sendname, #sendquit {
+input#sendname, input#sendquit {
     background: none repeat scroll 0 0 #999;
     border: 1px solid #FFFFFF;
     border-radius: 3px 3px 3px 3px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 1px 1px 3px rgba(255, 200, 200, 0.25);
     color: #fff;
     display: block;
     font-weight: bold;
-    height: 16px;
-    line-height: 1em;
-    margin: 10px 0 0;
-    padding: 30px 10px;
+    height: 40px;
+    line-height: 0;
+    padding: 25px 10px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 #sources a {
@@ -84,8 +87,9 @@ BODY {
     position:absolute;
 	right:0;
 	color:#FFF;
-	background-color: rgba(200,200,200,0.5);
+	background-color: rgba(255, 255, 255,0.5);
 	padding:10px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1)
 }
 #worldData {
     position:absolute;
@@ -93,6 +97,15 @@ BODY {
     left:5px;
 	color:#FFF;
 	padding:10px;
+}
+#status {
+    font-size: 1.4em;
+    background-color: rgba(155, 155, 255, 0.2);
+    color: #DDD;
+    border-radius: 7px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    border: 1px solid #888;
 }
 
 #broadcast div {

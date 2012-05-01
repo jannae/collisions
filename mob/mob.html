@@ -53,7 +53,7 @@
                 window.addEventListener("deviceorientation", ondeviceorientation, false);
                 window.addEventListener("touchend", touchHandler, false);
                 
-                var name = $('#name').val();
+                var name = String($('#name').val());
     			$('#name').val('');
                 userdata = {'ss': sizespd, 'r': r, 'g': g, 'b': b};
                                 
@@ -100,8 +100,8 @@
 	    }
 	
 	    function onDeviceMotion(event) {    	
-	        ax = event.accelerationIncludingGravity.x.toFixed(2); //ax = Math.abs(event.acceleration.x * 1000);
-	        ay = event.accelerationIncludingGravity.y.toFixed(2); //ay = Math.abs(event.acceleration.y * 1000);
+	        ax = parseFloat(event.accelerationIncludingGravity.x.toFixed(2)); //ax = Math.abs(event.acceleration.x * 1000);
+	        ay = parseFloat(event.accelerationIncludingGravity.y.toFixed(2)); //ay = Math.abs(event.acceleration.y * 1000);
 	        az = event.accelerationIncludingGravity.z.toFixed(2); //az = Math.abs(event.acceleration.z * 1000);
 	        ai = Math.round(event.interval * 100) / 100;
 	        rR = event.rotationRate;
