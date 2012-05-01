@@ -87,6 +87,13 @@ BODY {
 	background-color: rgba(200,200,200,0.5);
 	padding:10px;
 }
+#worldData {
+    position:absolute;
+    top:5px;
+    left:5px;
+	color:#FFF;
+	padding:10px;
+}
 
 #broadcast div {
 	position:relative;

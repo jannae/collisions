@@ -392,6 +392,7 @@ class World {
         food.add(b.loc);
       }
       worldData = { "food": food.getFood().size(), "blobs": blobs.size() };  
+      $('#worldData').html('Food: '+worldData['food']+'<br/>Blobs: '+worldData['blobs']);
     }
   }
   
