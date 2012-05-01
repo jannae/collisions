@@ -14,9 +14,10 @@ function handler(req, res) {
     var ext = path.extname(url_parts.pathname)
     
     if(/mobile/i.test(ua)) {
-        fpath = '/mob/index.html';
+        fpath = '/mob/mob.html';
     } else if (url_parts.pathname == '/test') {
-        fpath = '/_test/index.html';
+        //fpath = '/mob/mob.html';
+        fpath = '/_test/test.html';
     } else {
         fpath = '/cnv/index.html';
     }
@@ -64,26 +65,22 @@ io.sockets.on('connection', function (socket) {
 
 	// when the client emits 'adduser', this listens and executes
 	socket.on('adduser', function(username, userdata){
-		// we store the username in the socket session for this client        
-        if (usernames[username]) {
-            username = username+'_';
-        }
+		// we store the username in the socket session for this client
         socket.username = username;
         socket.userdata = userdata;
 		// add the client's username to the global list
 		usernames[username] = username;
-		// echo to client they've connected
+		io.sockets.emit('updateusers', usernames);
+        io.sockets.emit('useradded', username, userdata);
+        // echo to client they've connected
 		socket.emit('update', username, userdata);
 		// echo globally (all clients) that a person has connected
 		socket.broadcast.emit('update', username, userdata);
 		// update the list of users in app, client-side
-		io.sockets.emit('updateusers', usernames);
-        io.sockets.emit('useradded', username, userdata);
 	});
     
-    socket.on('kill', function(username) {
+    socket.on('kill', function(username){
         delete usernames[username];
-        console.log('killing'+username);
         io.sockets.emit('updateusers', usernames);
         io.sockets.emit('killed', username);
     });
@@ -95,7 +92,7 @@ io.sockets.on('connection', function (socket) {
 		// update list of users in app, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
-		socket.broadcast.emit('update', socket.username + ' has disconnected');
+		socket.broadcast.emit('update', socket.username, socket.userdata);
 	});
 });
 

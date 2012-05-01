@@ -1,54 +1,51 @@
 
-var bot = document.getElementById('sources').offsetHeight;
-var top = document.getElementById('header').offsetHeight;
-var cnvW = window.innerWidth;
-var cnvH = window.innerHeight - bot - top;
+int bot = document.getElementById('sources').offsetHeight;
+int top = document.getElementById('header').offsetHeight;
+int cnvW = window.innerWidth;
+int cnvH = window.innerHeight - bot - top;
 
 document.getElementById('printData').style.top = top;
 document.getElementById('printData').style.height = cnvH+'px';
 
-var names = ["Aidan","Alastair","Amos","Anderson","Andrew","Annabel","Aquilina","Araminta","Archibald","Arthur","Asher","August","Balthazar","Basie","Bechet","Bessie","Billie","Bix","Butch","Byron","Caleb","Calloway","Calvin","Cassandra","Cassian","Charlie","Christian","Clay","Clementine","Cole","Coleman","Colin","Coltrane","Cornelia","Cressida","Daisy","Dante","Dashiell","Delilah","Dexter","Dinah","Dixie","Dominic","Duke","Duncan","Edie","Edwin","Eli","Elias","Elijah","Ella","Ellington","Elvis","Emmanuel","Ethan","Etta","Ezra","Felix","Finn","Flora","Frances","Francis","Frank","Frederick","Gabriel","Georgia","Graham","Gregory","Gus","Harper","Harrison","Harry","Hayden","Hazel","Henry","Hester","Homer","Hopper","Hudson","Hugh","Hugo","Hunter","Ida","India","Iris","Isaac","Isla","Ivy","Jack","Jacob","Jarrett","Jasper","Jaz","Jazz","Jessamy","Jethro","Joe","Jonah","Joplin","Jude","Julian","June","Kai","Kenton","Kingston","Lennon","Leonora","Leopold","Levi","Lewis","Liam","Lila","Linus","Lola","Louis","Luca","Lucas","Lucius","Lulu","Mabel","Magnus","Malachi","Malcolm","Mamie","Matilda","Maud","Max","Mercer","Micah","Miles","Millie","Milo","Minnie","Moses","Nathan","Nathaniel","Ned","Nicholas","Noah","Oliver","Orson","Otis","Otto","Owen","Pansy","Patrick","Pearl","Persephone","Philip","Phineas","Phoebe","Quentin","Quincy","Ray","Reed","Roman","Romy","Roscoe","Rufus","Rupert","Sadie","Samuel","Sawyer","Sebastian","Simon","Stellan","Talullah","Thelonius","Tobias","Tristan","Truman","Tyree","Violet","Vita","Walker","Zachary"];
-var blobDNA = {};
-var user = "sys";
+var blobcol = {};
+var user;
 var blobData = {};
-var worldData = {};
+var worldinfo = {};
 
 World world;
 float nX, nY, nZ, gA, gB, gG, arA, arB, arG;
 int s;
-DNA blobgenes, click;
 
-socket.on('update', function(username, userdata, data){
-    var blobArr = [];
+color def = color(0,0,0);
+
+socket.on('useradded', function(username, userdata){
     user = cleanStr(username);
+    $.each(userdata, function(key, value){
+        blobcol[key] = value;
+    });    
+    color c = color(blobcol["r"],blobcol["g"],blobcol["b"]);
+        
+    world.born(random(cnvW),random(cnvH),c,username); 
+});
+
+socket.on('update', function(username, userdata, data) {
+    user = cleanStr(username);    
     divTxt  = "<p>Blob : " + user + "</p>";
     $.each(data, function(key, value){
-        iosData[key] = value;
-        divTxt += "<p>"+key+" : " + value + "</p>";
+        iosData[key] = parseFloat(value);
+        divTxt += "<p>"+key+" : " + parseFloat(value) + "</p>";
     });
     $('#data-'+user).html(divTxt);
     $.each(userdata, function(key, value){
-        blobDNA[key] = value;
-        blobArr.push(value);
+        blobcol[key] = value;
     });
-    $("#data-"+user).css("color","rgb("+parseInt(blobArr[1]*255)+","+parseInt(blobArr[2]*255)+","+parseInt(blobArr[3]*255)+")");
+    $("#data-"+user).css("color","rgb("+blobcol['r']+","+blobcol['g']+","+blobcol['b']+")");
 }); 
-
-socket.on('useradded', function(username, userdata){
-    var blobArr = [];
-    $.each(userdata, function(key, value){
-        blobArr.push(value);
-    });
-    blobgenes = blobArr;
-    console.log('genes: '+blobgenes);
-    world.born(random(cnvW),random(cnvH),blobgenes,cleanStr(username)); 
-    console.log('birthed :'+cleanStr(username));
-});
 
 void setup() {
     size(cnvW, cnvH);
     background(10);
-	world = new World(25);
+	world = new World(20, def);
 	smooth();
 }
 
@@ -60,7 +57,7 @@ void draw() {
     socketData();
     
     if(s == 1) {
-        world.born(random(cnvW),random(cnvH),blobgenes,user);
+        world.born(random(cnvW),random(cnvH),def,user);
         s = 0;
     }
   
@@ -69,7 +66,7 @@ void draw() {
 
 // We can add a creature manually if we so desire
 void mousePressed() {
-    world.born(mouseX,mouseY,null,"sys"); 
+    world.born(mouseX,mouseY,def,'Blobby'); 
 }
 
 // Evolution EcoSystem
@@ -79,9 +76,9 @@ void mousePressed() {
 
 class Blob {
   PVector loc,vel,acc;  // location
-  DNA dna;              // DNA
-  float health;         // Life timer
-  float xoff;           // For perlin noise
+  DNA dna;          // DNA
+  float health;     // Life timer
+  float xoff;       // For perlin noise
   float yoff;
   int kids;
   
@@ -93,25 +90,36 @@ class Blob {
   String name;
 
   // Create a "blob" creature
-  Blob(PVector l, DNA dna_, String n) {
+  Blob(PVector l, DNA dna_, color c, String n) {
     loc = l.get();
-    health = parseInt(random(150,235));
+    health = 200;
     dna = dna_;
     name = n;
     kids = 0;
-    xoff = random(1000);
-    yoff = random(1000);
+    
+    console.log(name+', '+user);
+    
+    if(name != user) {
+        xoff = random(1000);
+        yoff = random(1000);
+    }
     // Gene 0 determines maxspeed and r
     // The bigger the blob, the slower it is
     maxspeed = map(dna.genes[0], 0, 1, 15, 0);
     r = map(dna.genes[0], 0, 1, 5, 50);
 	s = random(1,4);
-    fcolor = color(parseInt(255*dna.genes[1]),parseInt(255*dna.genes[2]),parseInt(255*dna.genes[3]));
     
-    if (name == 'sys') {
-        int rn = int(random(names.length));
-        name = cleanStr(names[rn]);
-    }
+    
+    
+    
+    //if the color isn't user-defined
+    //if (c == def) {
+    c = color(255*genes[1],255*genes[2],255*genes[3]);
+        //c = color(random(255),random(255),random(255));        
+    //} else {
+        
+    //}
+    fcolor = c;
   }
 
   void run() {
@@ -139,21 +147,32 @@ class Blob {
   }
 
   // At any moment there is a teeny, tiny chance a blob will reproduce  
-  Blob reproduce(Blob mate, int chance) {
+  Blob reproduce(Blob mate) {
     //sexual reproduction
-    if (chance < 0.005) {
-        kids++;
-        chance = 1;
-        status(name+' and '+mate.name+' had a baby!');
-        //console.log(name+' has '+kids+' kids!');
-        //console.log('parent 1: '+health+'; parent 2: '+mate.health);
-        DNA childDNA = dna.crossover(mate.dna);
-        // Child DNA can mutate
-        childDNA.mutate(0.01);
-        return new Blob(new PVector(random(width),random(height)), childDNA, 'sys');
+    if (random(1) < 0.0005) {
+    kids++;
+    DNA childDNA = dna.crossover(mate.dna);
+    // Child DNA can mutate
+    childDNA.mutate(0.01);
+    return new Blob(loc, childDNA, fcolor, name);
+    console.log(name+' kid'+kids);
     } else {
         return null;
     }
+
+    //asexual reproduction
+    /*if (random(1) < 0.0005) {
+        kids++;
+        // Child is exact copy of single parent
+        DNA childDNA = dna.copy();
+        // Child DNA can mutate
+        childDNA.mutate(0.01);
+        return new Blob(loc, childDNA, fcolor, name);
+        console.log(name+' kid'+kids);
+    } 
+    else {
+        return null;
+    }*/
   }
 
   // Method to update loc
@@ -167,18 +186,15 @@ class Blob {
     } else { 
         vx = map(noise(xoff),0,1,-maxspeed,maxspeed);
         vy = map(noise(yoff),0,1,-maxspeed,maxspeed);
+        xoff += 0.01;
+        yoff += 0.01;
     }
     
     PVector velocity = new PVector(vx,vy);
-    xoff += 0.01;
-    yoff += 0.01;
-    
     loc.add(velocity);
 
     // Death always looming
     health -= 0.2;
-    
-    //blobData = {"name": name, "health": health, "kids": kids};
   }
 
   // Wraparound
@@ -196,7 +212,6 @@ class Blob {
     stroke(255,health);
     fill(fcolor, health);
     ellipse(loc.x, loc.y, r, r);
-    
     // eyes below!
     strokeWeight(1);
     fill(200, health+20);
@@ -210,20 +225,23 @@ class Blob {
     
     fill(fcolor, health);
     if(name != 'sys') {
-        textAlign(CENTER);
-        text(name, loc.x, loc.y+(r+s+3)); 
+        text(name, loc.x-(r/2), loc.y-r) 
     }
   }
   
   // Death
   boolean dead() {
     if (health < 0.0) {
-        socket.emit('kill', name);
-        status(name+' has died. :(');
-        return true;
-    } else {
+      return true;
+      socket.emit('kill', name);
+    } 
+    else {
       return false;
     }
+  }
+  
+    ArrayList getBlobs() {
+    return food;
   }
 }
 
@@ -342,26 +360,22 @@ class World {
   Food food;
 
   // Constructor
-  World(int num) {
+  World(int num, color c) {
     // Start with initial food and creatures
     food = new Food(num);
     blobs = new ArrayList<Blob>();              // Initialize the arraylist
-    
     for (int i = 0; i < num; i++) {
       PVector l = new PVector(random(width),random(height));
       DNA dna = new DNA();
-      blobs.add(new Blob(l,dna,'sys'));
+      blobs.add(new Blob(l,dna,c,'sys'));
     }
   }
   
   // Make a new creature
-  void born(float x, float y, DNA d, String nm) {
+  void born(float x, float y, color col, String nm) {
     PVector l = new PVector(x,y);
-    if (d == null) {
-        DNA dna = new DNA();
-    } else { DNA dna = new DNA(d); }
-    blobs.add(new Blob(l,dna,nm));
-    console.log('add blob: '+nm);
+    DNA dna = new DNA();
+    blobs.add(new Blob(l,dna,col,nm));
   }
 
   // Run the world
@@ -375,14 +389,13 @@ class World {
       Blob b = blobs.get(i);
       //cycle through every other blob for sexual reproduction
       for (int j = blobs.size()-1; j >= 0; j--) {
-            Blob m = blobs.get(j);
-            float d = PVector.dist(b.loc, m.loc);
-            int baby = random(1);
-            if (d < b.r/2 && b != m) {
-                //status("Let's go "+b.name+" and "+m.name+"!");
-                Blob child = b.reproduce(m,baby);
-                if (child != null) {blobs.add(child);}
-            }
+          Blob m = blobs.get(j);
+          float d = PVector.dist(b.loc, m.loc);
+          
+          if (d < b.r/2 && b != m) {
+            Blob child = b.reproduce(m);
+            if (child != null) blobs.add(child);
+          }
       }
       b.run();
       b.eat(food);
@@ -391,7 +404,10 @@ class World {
         blobs.remove(i);
         food.add(b.loc);
       }
-      worldData = { "food": food.getFood().size(), "blobs": blobs.size() };  
+      // Asexual, random reproduction
+      //Blob child = b.reproduce();
+      
+      //if (child != null) blobs.add(child);     
     }
   }
   
@@ -399,11 +415,8 @@ class World {
   ArrayList getBlobs() {
     return blobs;
   }
-}
+} 
 
-void status(var s) {
-    $('#status').html(s);
-}
 
 // getting/setting all the data from the socket connection
 void socketData() {

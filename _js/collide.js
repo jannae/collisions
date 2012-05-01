@@ -3,7 +3,7 @@ int top = document.getElementById('header').offsetHeight;
 int cnvW = window.innerWidth;
 int cnvH = window.innerHeight - bot - top;
 
-document.getElementById('printData').style.top = top;
+document.getElementById('printData').style.top = top+'px';
 
 
 Mover m;

@@ -3,7 +3,7 @@
 <html>
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<!--link rel="apple-touch-icon" href="apple-touch-icon.png" /-->
+    <!--link rel="apple-touch-icon" href="apple-touch-icon.png" /-->
 	<meta name="apple-touch-fullscreen" content="yes" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -22,7 +22,7 @@
         var socket = io.connect();
         
         var x, y, z; // Position Variables for 
-	    var vx, vy, vz; // Speed - Velocity
+        var vx, vy, vz; // Speed - Velocity
 	    var ax, ay, az; // Acceleration
 	    var ai; // data reporting interval (event.interval)
 	    var arAlpha, arBeta, arGamma; // rotation acceleration angles
@@ -32,31 +32,32 @@
 	    var beta = 0;
 	    var gamma = 0;
 	    var stabilize = 0;
-        var delay = 100;
+
         //code for random rgb colors
-        var r = random(0,255);
-        var g = random(0,255);
-        var b = random(0,255);
+        var r = Math.random();
+        var g = Math.random();
+        var b = Math.random();
+        var sizespd = Math.random();
 
         var iosData = {};
+        var userData = {};
 	    	
-        $(document).ready(function() {
+	    $(document).ready(function() {
             $('#broadcast').hide();
             
             $('#sendname').click( function() {
                 $('#signin').hide();
                 $('#broadcast').show();
                 
-            	var name = $('#name').val();
-    			$('#name').val('');
+                window.addEventListener("devicemotion", onDeviceMotion, false);
+                window.addEventListener("deviceorientation", ondeviceorientation, false);
+                window.addEventListener("touchend", touchHandler, false);
                 
-                //userdata = 'rgb('+r+','+g+','+b+')';
-                userdata = {'r': r, 'g':g, 'b':b};
+                var name = $('#name').val();
+    			$('#name').val('');
+                userdata = {'ss': sizespd, 'r': r, 'g': g, 'b': b};
                                 
-                /*//code for random hex colors
-                userdata = ((1<<24)*Math.random()|0).toString(16);
-                $('#header h2',{html:name}).css('color','#'+userdata).appendTo('#header');*/
-                $('#header h2').html(name).css('color','rgb('+r+','+g+','+b+')');
+                $('#header h2').html(name).css('color','rgb('+parseInt(r*255)+','+parseInt(g*255)+','+parseInt(b*255)+')');
                 
         		socket.emit('adduser', name, userdata);
                 
@@ -65,10 +66,6 @@
                         sockexit();
                     }
                 });
-                
-                setInterval(function() {
-                    testData();
-                }, delay);
             });
             
             $('#sendquit').click( function() {
@@ -76,30 +73,46 @@
             });
 	    });
         
+        function cleanStr(str) {
+            if (str != null){
+                str = str.replace(/\s+/g, '');
+                str = str.replace(/,/g, '');
+                str = str.replace(/\./g, '');
+                str = str.toLowerCase();    
+                return str
+            }
+        }
+        
         function sockexit() {
             socket.disconnect();
             $('#signin').show();
             $('#broadcast').hide();
             $('#header h2').empty();
         }
+	    function ondeviceorientation(event) {
+	        alpha = event.alpha.toFixed(2);
+	        beta = event.beta.toFixed(2);
+	        gamma = event.gamma.toFixed(2);
+	    }
 	
-	    function testData() {
-            	
-            alpha = random(-100,100);
-            beta  = random(-100,100);
-	        gamma = random(-100,100);
-            
-	        ax = random(-20,20);
-	        ay = random(-20,20);
-	        az = random(-20,20);
-            
-	        ai = random(-20,20)/10;
-            
-	        arAlpha = random(-360,360);
-	        arBeta  = random(-360,360);
-	        arGamma = random(-360,360);
+	    function touchHandler(event) {
+	        stabilize = 1;
+	    }
+	
+	    function onDeviceMotion(event) {    	
+	        ax = event.accelerationIncludingGravity.x.toFixed(2); //ax = Math.abs(event.acceleration.x * 1000);
+	        ay = event.accelerationIncludingGravity.y.toFixed(2); //ay = Math.abs(event.acceleration.y * 1000);
+	        az = event.accelerationIncludingGravity.z.toFixed(2); //az = Math.abs(event.acceleration.z * 1000);
+	        ai = Math.round(event.interval * 100) / 100;
+	        rR = event.rotationRate;
+	
+	        if (rR != null) {
+	            arAlpha = rR.alpha.toFixed(2);
+	            arBeta = rR.beta.toFixed(2);
+	            arGamma = rR.gamma.toFixed(2);
+	        }
 			    	
-	        var iosjson = {
+            var iosjson = {
 	                'x': ax,
 	                'y': ay,
 	                'z': az,
@@ -126,59 +139,30 @@
 	
 	        if (stabilize == 1) {
 				stabilize = 0;  // reset stabilization request
-			}
+			}   
             
-            socket.emit('sendData', iosjson );
+            socket.emit('sendData', iosjson );            
 	    }
-        
-        function random (min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
 	</script>
 
 	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
-	</head>
+</head>
 <body>
     <div id="header">
-      <h1>Collide-TEST.</h1>
+      <h1>Collide.</h1>
       <h2></h2>
     </div>
     <div id="signin">
         <input id="name" />
-        <input id="sendname" type="button"  value="name" />
+        <input id="sendname" type="button"  value="Play." />
     </div>
     <div id="broadcast">
       <div class="box" id="accel"> <span class="head">Accelerometer</span> <span id="x"></span> <span id="y"></span> <span id="z"></span> <span id="i"></span> <span id="ar"></span> <span id="br"></span> <span id="gr"></span> </div>
       <div class="box" id="gyro"> <span class="head">Gyroscope</span> <span id="a"></span> <span id="b"></span> <span id="g"></span> </div>
-      <div class="clear"></div>
-      <input id="sendquit" type="button"  value="quit" />
-        <canvas id="run" style="position:absolute">
-        <script id="sketch" type="application/processing">
-            var top = document.getElementById('header').offsetHeight;
-            var cnvW = window.innerWidth;
-            var cnvH = window.innerHeight - top;
-            document.getElementById('run').style.top = top;
-            
-            console.log(top+', cnvW: '+cnvW+', cnvH: '+cnvH);
-            float radius = 50.0;
-            color blobby = color(r,g,b);
-            void setup(){
-                size(cnvW, cnvH);
-                strokeWeight( 10 );
-            }
-            void draw(){
-              radius = radius + sin( frameCount / 4 );
-              background(0);
-              fill(blobby);
-              stroke(255);
-              ellipse( width / 2, width / 2, radius, radius );                  
-            }
-        </script>
-        	<p>Your browser does not support the canvas tag.</p>
-        </canvas>
-        <noscript>
-        	<p>JavaScript is required to view the contents of this page.</p>
-        </noscript>
+      <br class="clear" />
+      <input id="sendquit" type="button"  value="Disconnect" />
     </div>
 </body>
 </html>
+
+    

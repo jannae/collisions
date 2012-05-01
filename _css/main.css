@@ -8,24 +8,30 @@ BODY {
 
 #header {
 	z-index:5;
-	line-height:1.9;
 	background-color:rgba(100,100,100,10);
-	font-size: 2.5em;
 	color:#FFF;
 	-moz-box-shadow:inset 0 0 5px #000;
 	-webkit-box-shadow:inset 0 0 5px #000;
 	box-shadow:inset 0 0 5px #000;
 	text-align: center;
+    padding:5px;
 }
 #header img {
 	width: 50px;
 	display: inline;
 }
-#header h1 {
-	margin:0;
-	padding: 0;
-	display: inline;
+#header h1, #header h2 {
 	vertical-align: top;
+}
+#header h1 { 
+    line-height:1.9;
+    font-weight:700;
+    font-size: 2.5em;
+    display:inline;
+}
+#header h2 {
+    font-weight:500;
+    font-size: 1.8em;
 }
 
 #sources {
@@ -36,7 +42,39 @@ BODY {
 	color:#FFF;
 	padding:10px
 }
+#signin, #broadcast {
+    padding:0px;
 
+}
+#signin input, #broadcast input {
+    display:block;
+    height:20px;
+	border:0;
+	padding:4px 8px;
+    width:240px;
+    height:40px;
+    font-size: 24px;
+    margin:10px auto;
+}
+#signin input {
+     margin:30px auto;
+}
+#name {
+}
+#sendname, #sendquit {
+    background: none repeat scroll 0 0 #999;
+    border: 1px solid #FFFFFF;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    display: block;
+    font-weight: bold;
+    height: 16px;
+    line-height: 1em;
+    margin: 10px 0 0;
+    padding: 30px 10px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
 #sources a {
 	color:#FAF000;
 	text-decoration: none;
@@ -65,9 +103,6 @@ BODY {
 	color: #FFF;
 }
 
-#header {
-	font-weight:700;
-}
 .clear {
 	clear:both;
 }

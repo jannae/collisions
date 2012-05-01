@@ -13,14 +13,14 @@
     <link rel="stylesheet" type="text/css" href="./_css/main.css">
     
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    
+    <script type="text/javascript" language="javascript" src="./_js/processing-1.3.6.min.js"></script>
+    
 	<script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
     
         var socket = io.connect();
-    	        
-        var iosData = {};
         
-        var userdata,r,g,b;
         var x, y, z; // Position Variables for 
 	    var vx, vy, vz; // Speed - Velocity
 	    var ax, ay, az; // Acceleration
@@ -32,67 +32,70 @@
 	    var beta = 0;
 	    var gamma = 0;
 	    var stabilize = 0;
+
+        //code for random rgb colors
+        var r = Math.random();
+        var g = Math.random();
+        var b = Math.random();
+        var sizespd = Math.random();
+
+        var iosData = {};
 	    	
-	    $(document).ready(function() {
+        $(document).ready(function() {
             $('#broadcast').hide();
             
             $('#sendname').click( function() {
                 $('#signin').hide();
                 $('#broadcast').show();
                 
-        		var name = $('#name').val();
+            	var name = $('#name').val();
     			$('#name').val('');
+                userdata = {'ss': sizespd, 'r': r, 'g':g, 'b':b};
+                                
+                $('#header h2').html(name).css('color','rgb('+parseInt(r*255)+','+parseInt(g*255)+','+parseInt(b*255)+')');
                 
-                //code for random rgb colors
-                r = random(0,255);
-                g = random(0,255);
-                b = random(0,255);
-                //userdata = 'rgb('+r+','+g+','+b+')';
-                userdata = {'r': r, 'g':g, 'b':b};
+        		socket.emit('adduser', name, userdata);
                 
-                /*//code for random hex colors
-                userdata = ((1<<24)*Math.random()|0).toString(16);
-                $('<h2/>',{html:name}).css('color','#'+userdata).appendTo('#header');*/
-                $('#header h2').html(name).css('color','rgb('+r+','+g+','+b+')');
+                socket.on('killed', function(username) {
+                    if(username == name) {
+                        sockexit();
+                    }
+                });
                 
-    			socket.emit('adduser', name, userdata);
-		    
-    	        window.addEventListener("devicemotion", onDeviceMotion, false);
-    	        window.addEventListener("deviceorientation", ondeviceorientation, false);
-    	        window.addEventListener("touchend", touchHandler, false);
+                setInterval(function() {
+                    testData();
+                }, delay);
             });
+            
             $('#sendquit').click( function() {
-                socket.disconnect();
-                $('#signin').show();
-                $('#broadcast').hide();
-                $('#header h2').empty();
+                sockexit();
             });
 	    });
+        
+        function sockexit() {
+            socket.disconnect();
+            $('#signin').show();
+            $('#broadcast').hide();
+            $('#header h2').empty();
+        }
 	
-	    function ondeviceorientation(event) {
-	        alpha = event.alpha.toFixed(2);
-	        beta = event.beta.toFixed(2);
-	        gamma = event.gamma.toFixed(2);
-	    }
-	
-	    function touchHandler(event) {
-	        stabilize = 1;
-	    }
-	
-	    function onDeviceMotion(event) {    	
-	        ax = event.accelerationIncludingGravity.x.toFixed(2); //ax = Math.abs(event.acceleration.x * 1000);
-	        ay = event.accelerationIncludingGravity.y.toFixed(2); //ay = Math.abs(event.acceleration.y * 1000);
-	        az = event.accelerationIncludingGravity.z.toFixed(2); //az = Math.abs(event.acceleration.z * 1000);
-	        ai = Math.round(event.interval * 100) / 100;
-	        rR = event.rotationRate;
-	
-	        if (rR != null) {
-	            arAlpha = rR.alpha.toFixed(2);
-	            arBeta = rR.beta.toFixed(2);
-	            arGamma = rR.gamma.toFixed(2);
-	        }
+	    function testData() {
+            	
+            alpha = random(-100,100);
+            beta  = random(-100,100);
+	        gamma = random(-100,100);
+            
+	        ax = random(-20,20);
+	        ay = random(-20,20);
+	        az = random(-20,20);
+            
+	        ai = random(-20,20)/10;
+            
+	        arAlpha = random(-360,360);
+	        arBeta  = random(-360,360);
+	        arGamma = random(-360,360);
 			    	
-            var iosjson = {
+	        var iosjson = {
 	                'x': ax,
 	                'y': ay,
 	                'z': az,
@@ -125,26 +128,26 @@
 	    }
         
         function random (min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+            return (Math.random() * (max - min + 1)) + min;
         }
 	</script>
 
 	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
-</head>
+	</head>
 <body>
     <div id="header">
-      <h1>Collide.</h1>
+      <h1>Collide-TEST.</h1>
+      <h2></h2>
     </div>
     <div id="signin">
         <input id="name" />
-        <input id="sendname" type="button"  value="name" />
+        <input id="sendname" type="button"  value="Play." />
     </div>
     <div id="broadcast">
       <div class="box" id="accel"> <span class="head">Accelerometer</span> <span id="x"></span> <span id="y"></span> <span id="z"></span> <span id="i"></span> <span id="ar"></span> <span id="br"></span> <span id="gr"></span> </div>
       <div class="box" id="gyro"> <span class="head">Gyroscope</span> <span id="a"></span> <span id="b"></span> <span id="g"></span> </div>
-      <div class="clear"></div>
-      <input id="sendquit" type="button"  value="quit" />
+      <br class="clear" />
+      <input id="sendquit" type="button"  value="Disconnect" />
     </div>
 </body>
 </html>
-    
