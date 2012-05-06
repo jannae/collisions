@@ -113,18 +113,19 @@
 	        }
 			    	
             var iosjson = {
-	                'x': ax,
-	                'y': ay,
-	                'z': az,
-                    'i': ai,
-	                'a': alpha,
-	                'b': beta,
-	                'g': gamma,
-	                'ar': arAlpha,
-	                'br': arBeta,
-	                'gr': arGamma,
-	                's': stabilize
-	        };
+                    'go': 1,
+	                'x': parseFloat(ax),
+	                'y': parseFloat(ay),
+	                'z': parseFloat(az),
+                    'i': parseFloat(ai),
+	                'a': parseFloat(alpha),
+	                'b': parseFloat(beta),
+	                'g': parseFloat(gamma),
+	                'ar': parseFloat(arAlpha),
+	                'br': parseFloat(arBeta),
+	                'gr': parseFloat(arGamma),
+	                's': stabilize   
+            };
             
 			document.getElementById("x").innerHTML = "X: " + ax;
     		document.getElementById("y").innerHTML = "Y: " + ay;
@@ -153,7 +154,7 @@
       <h2></h2>
     </div>
     <div id="signin">
-        <input id="name" />
+        Name: <input id="name" />
         <input id="sendname" type="button"  value="Play." />
     </div>
     <div id="broadcast">
