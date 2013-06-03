@@ -1,6 +1,6 @@
 # Collisions.
 
-Final Project for [The Nature of Code](http://itp.nyu.edu/physcomp/). (Spring 2012)
+Final Project for [The Nature of Code](http://natureofcode.com/). (Spring 2012)
 
 A genetic algorithm-based civilization experiment.
 
@@ -10,4 +10,4 @@ A genetic algorithm-based civilization experiment.
 * iPhone Accelerometer/Gyroscope API Data
 * [Processing.js](http://processingjs.org/)
 * [Processing](http://processing.org/)
-* Javascript / HTML/5 / CSS/3
+* Javascript /JQuery / HTML/5 / CSS/3
