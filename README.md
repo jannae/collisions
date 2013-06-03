@@ -10,4 +10,4 @@ A genetic algorithm-based civilization experiment.
 * iPhone Accelerometer/Gyroscope API Data
 * [Processing.js](http://processingjs.org/)
 * [Processing](http://processing.org/)
-* Javascript /JQuery / HTML/5 / CSS/3
+* Javascript / jQuery / HTML/5 / CSS/3
