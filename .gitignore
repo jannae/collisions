@@ -1,7 +1,7 @@
 # Project Specific
 _libs
 _test
-
+bin
 
 # Created by https://www.gitignore.io/api/sublimetext,macos,bower,node
 
