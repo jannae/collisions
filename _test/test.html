@@ -3,35 +3,35 @@
 <html>
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<!--link rel="apple-touch-icon" href="apple-touch-icon.png" /-->
-	<meta name="apple-touch-fullscreen" content="yes" />
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<title>Collide.</title>
+    <!--link rel="apple-touch-icon" href="apple-touch-icon.png" /-->
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Collisions.</title>
 
     <link rel="stylesheet" type="text/css" href="./_css/reset.css">
     <link rel="stylesheet" type="text/css" href="./_css/main.css">
-    
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
     <script type="text/javascript" language="javascript" src="./_js/processing-1.3.6.min.js"></script>
-    
-	<script src="/socket.io/socket.io.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
-    
+
         var socket = io.connect();
-        
-        var x, y, z; // Position Variables for 
-	    var vx, vy, vz; // Speed - Velocity
-	    var ax, ay, az; // Acceleration
-	    var ai; // data reporting interval (event.interval)
-	    var arAlpha, arBeta, arGamma; // rotation acceleration angles
-	    var delay = 100;
-	    var vMultiplier = 0.01;
-	    var alpha = 0;
-	    var beta = 0;
-	    var gamma = 0;
-	    var stabilize = 0;
+
+        var x, y, z; // Position Variables for
+        var vx, vy, vz; // Speed - Velocity
+        var ax, ay, az; // Acceleration
+        var ai; // data reporting interval (event.interval)
+        var arAlpha, arBeta, arGamma; // rotation acceleration angles
+        var delay = 100;
+        var vMultiplier = 0.01;
+        var alpha = 0;
+        var beta = 0;
+        var gamma = 0;
+        var stabilize = 0;
 
         //code for random rgb colors
         var r = Math.random();
@@ -40,106 +40,106 @@
         var sizespd = Math.random();
 
         var iosData = {};
-	    	
+
         $(document).ready(function() {
             $('#broadcast').hide();
-            
+
             $('#sendname').click( function() {
                 $('#signin').hide();
                 $('#broadcast').show();
-                
-            	var name = $('#name').val();
-    			$('#name').val('');
+
+                var name = $('#name').val();
+                $('#name').val('');
                 userdata = {'ss': sizespd, 'r': r, 'g':g, 'b':b};
-                                
+
                 $('#header h2').html(name).css('color','rgb('+parseInt(r*255)+','+parseInt(g*255)+','+parseInt(b*255)+')');
-                
-        		socket.emit('adduser', name, userdata);
-                
+
+                socket.emit('adduser', name, userdata);
+
                 socket.on('killed', function(username) {
                     if(username == name) {
                         sockexit();
                     }
                 });
-                
+
                 setInterval(function() {
                     testData();
                 }, delay);
             });
-            
+
             $('#sendquit').click( function() {
                 sockexit();
             });
-	    });
-        
+        });
+
         function sockexit() {
             socket.disconnect();
             $('#signin').show();
             $('#broadcast').hide();
             $('#header h2').empty();
         }
-	
-	    function testData() {
-            	
+
+        function testData() {
+
             alpha = random(-100,100);
             beta  = random(-100,100);
-	        gamma = random(-100,100);
-            
-	        ax = random(-10,10);
-	        ay = random(-10,10);
-	        az = random(-20,20);
-            
-	        ai = random(-20,20)/10;
-            
-	        arAlpha = random(-360,360);
-	        arBeta  = random(-360,360);
-	        arGamma = random(-360,360);
-			 /*   	
-	        var iosjson = {
-	                'x': ax,
-	                'y': ay,
-	                'z': az,
-                    'i': ai,
-	                'a': alpha,
-	                'b': beta,
-	                'g': gamma,
-	                'ar': arAlpha,
-	                'br': arBeta,
-	                'gr': arGamma,
-	                's': stabilize
-	        };*/
-            
+            gamma = random(-100,100);
+
+            ax = random(-10,10);
+            ay = random(-10,10);
+            az = random(-20,20);
+
+            ai = random(-20,20)/10;
+
+            arAlpha = random(-360,360);
+            arBeta  = random(-360,360);
+            arGamma = random(-360,360);
+             /*
             var iosjson = {
                     'x': ax,
-	                'y': ay,
-	                's': stabilize
-	        };
-            
-			document.getElementById("x").innerHTML = "X: " + ax;
-    		document.getElementById("y").innerHTML = "Y: " + ay;
-			document.getElementById("z").innerHTML = "Z: " + az;
-			document.getElementById("i").innerHTML = "I: " + ai;
-			document.getElementById("ar").innerHTML = "arA: " + arAlpha;
-			document.getElementById("br").innerHTML = "arB: " + arBeta;
-			document.getElementById("gr").innerHTML = "arG: " + arGamma;
-			document.getElementById("a").innerHTML = "Alpha: " + alpha;
-			document.getElementById("b").innerHTML = "Beta: " + beta;
-			document.getElementById("g").innerHTML = "Gamma: " + gamma;
-	
-	        if (stabilize == 1) {
-				stabilize = 0;  // reset stabilization request
-			}
-            
+                    'y': ay,
+                    'z': az,
+                    'i': ai,
+                    'a': alpha,
+                    'b': beta,
+                    'g': gamma,
+                    'ar': arAlpha,
+                    'br': arBeta,
+                    'gr': arGamma,
+                    's': stabilize
+            };*/
+
+            var iosjson = {
+                    'x': ax,
+                    'y': ay,
+                    's': stabilize
+            };
+
+            document.getElementById("x").innerHTML = "X: " + ax;
+            document.getElementById("y").innerHTML = "Y: " + ay;
+            document.getElementById("z").innerHTML = "Z: " + az;
+            document.getElementById("i").innerHTML = "I: " + ai;
+            document.getElementById("ar").innerHTML = "arA: " + arAlpha;
+            document.getElementById("br").innerHTML = "arB: " + arBeta;
+            document.getElementById("gr").innerHTML = "arG: " + arGamma;
+            document.getElementById("a").innerHTML = "Alpha: " + alpha;
+            document.getElementById("b").innerHTML = "Beta: " + beta;
+            document.getElementById("g").innerHTML = "Gamma: " + gamma;
+
+            if (stabilize == 1) {
+                stabilize = 0;  // reset stabilization request
+            }
+
             socket.emit('sendData', iosjson );
-	    }
-        
+        }
+
         function random (min, max) {
             return (Math.random() * (max - min + 1)) + min;
         }
-	</script>
+    </script>
 
-	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
-	</head>
+    <!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
+    </head>
 <body>
     <div id="header">
       <h1>Collide.</h1>

@@ -4,34 +4,34 @@
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <!--link rel="apple-touch-icon" href="apple-touch-icon.png" /-->
-	<meta name="apple-touch-fullscreen" content="yes" />
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<title>Collide.</title>
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Collide.</title>
 
     <link rel="stylesheet" type="text/css" href="./_css/reset.css">
     <link rel="stylesheet" type="text/css" href="./_css/main.css">
-    
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
     <script type="text/javascript" language="javascript" src="./_js/processing-1.3.6.min.js"></script>
-    
-	<script src="/socket.io/socket.io.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
-    
+
         var socket = io.connect();
-        
-        var x, y, z; // Position Variables for 
+
+        var x, y, z; // Position Variables for
         var vx, vy, vz; // Speed - Velocity
-	    var ax, ay, az; // Acceleration
-	    var ai; // data reporting interval (event.interval)
-	    var arAlpha, arBeta, arGamma; // rotation acceleration angles
-	    var delay = 100;
-	    var vMultiplier = 0.01;
-	    var alpha = 0;
-	    var beta = 0;
-	    var gamma = 0;
-	    var stabilize = 0;
+        var ax, ay, az; // Acceleration
+        var ai; // data reporting interval (event.interval)
+        var arAlpha, arBeta, arGamma; // rotation acceleration angles
+        var delay = 100;
+        var vMultiplier = 0.01;
+        var alpha = 0;
+        var beta = 0;
+        var gamma = 0;
+        var stabilize = 0;
 
         //code for random rgb colors
         var r = Math.random();
@@ -41,112 +41,112 @@
 
         var iosData = {};
         var userData = {};
-	    	
-	    $(document).ready(function() {
+
+        $(document).ready(function() {
             $('#broadcast').hide();
-            
+
             $('#sendname').click( function() {
                 $('#signin').hide();
                 $('#broadcast').show();
-                
+
                 window.addEventListener("devicemotion", onDeviceMotion, false);
                 window.addEventListener("deviceorientation", ondeviceorientation, false);
                 window.addEventListener("touchend", touchHandler, false);
-                
+
                 var name = String($('#name').val());
-    			$('#name').val('');
+                $('#name').val('');
                 userdata = {'ss': sizespd, 'r': r, 'g': g, 'b': b};
-                                
+
                 $('#header h2').html(name).css('color','rgb('+parseInt(r*255)+','+parseInt(g*255)+','+parseInt(b*255)+')');
-                
-        		socket.emit('adduser', name, userdata);
-                
+
+                socket.emit('adduser', name, userdata);
+
                 socket.on('killed', function(username) {
                     if(username == name) {
                         sockexit();
                     }
                 });
             });
-            
+
             $('#sendquit').click( function() {
                 sockexit();
             });
-	    });
-        
+        });
+
         function cleanStr(str) {
             if (str != null){
                 str = str.replace(/\s+/g, '');
                 str = str.replace(/,/g, '');
                 str = str.replace(/\./g, '');
-                str = str.toLowerCase();    
+                str = str.toLowerCase();
                 return str
             }
         }
-        
+
         function sockexit() {
             socket.disconnect();
             $('#signin').show();
             $('#broadcast').hide();
             $('#header h2').empty();
         }
-	    function ondeviceorientation(event) {
-	        alpha = event.alpha.toFixed(2);
-	        beta = event.beta.toFixed(2);
-	        gamma = event.gamma.toFixed(2);
-	    }
-	
-	    function touchHandler(event) {
-	        stabilize = 1;
-	    }
-	
-	    function onDeviceMotion(event) {    	
-	        ax = parseFloat(event.accelerationIncludingGravity.x.toFixed(2)); //ax = Math.abs(event.acceleration.x * 1000);
-	        ay = parseFloat(event.accelerationIncludingGravity.y.toFixed(2)); //ay = Math.abs(event.acceleration.y * 1000);
-	        az = event.accelerationIncludingGravity.z.toFixed(2); //az = Math.abs(event.acceleration.z * 1000);
-	        ai = Math.round(event.interval * 100) / 100;
-	        rR = event.rotationRate;
-	
-	        if (rR != null) {
-	            arAlpha = rR.alpha.toFixed(2);
-	            arBeta = rR.beta.toFixed(2);
-	            arGamma = rR.gamma.toFixed(2);
-	        }
-			    	
+        function ondeviceorientation(event) {
+            alpha = event.alpha.toFixed(2);
+            beta = event.beta.toFixed(2);
+            gamma = event.gamma.toFixed(2);
+        }
+
+        function touchHandler(event) {
+            stabilize = 1;
+        }
+
+        function onDeviceMotion(event) {
+            ax = parseFloat(event.accelerationIncludingGravity.x.toFixed(2)); //ax = Math.abs(event.acceleration.x * 1000);
+            ay = parseFloat(event.accelerationIncludingGravity.y.toFixed(2)); //ay = Math.abs(event.acceleration.y * 1000);
+            az = event.accelerationIncludingGravity.z.toFixed(2); //az = Math.abs(event.acceleration.z * 1000);
+            ai = Math.round(event.interval * 100) / 100;
+            rR = event.rotationRate;
+
+            if (rR != null) {
+                arAlpha = rR.alpha.toFixed(2);
+                arBeta = rR.beta.toFixed(2);
+                arGamma = rR.gamma.toFixed(2);
+            }
+
             var iosjson = {
                     'go': 1,
-	                'x': parseFloat(ax),
-	                'y': parseFloat(ay),
-	                'z': parseFloat(az),
+                    'x': parseFloat(ax),
+                    'y': parseFloat(ay),
+                    'z': parseFloat(az),
                     'i': parseFloat(ai),
-	                'a': parseFloat(alpha),
-	                'b': parseFloat(beta),
-	                'g': parseFloat(gamma),
-	                'ar': parseFloat(arAlpha),
-	                'br': parseFloat(arBeta),
-	                'gr': parseFloat(arGamma),
-	                's': stabilize   
+                    'a': parseFloat(alpha),
+                    'b': parseFloat(beta),
+                    'g': parseFloat(gamma),
+                    'ar': parseFloat(arAlpha),
+                    'br': parseFloat(arBeta),
+                    'gr': parseFloat(arGamma),
+                    's': stabilize
             };
-            
-			document.getElementById("x").innerHTML = "X: " + ax;
-    		document.getElementById("y").innerHTML = "Y: " + ay;
-			document.getElementById("z").innerHTML = "Z: " + az;
-			document.getElementById("i").innerHTML = "I: " + ai;
-			document.getElementById("ar").innerHTML = "arA: " + arAlpha;
-			document.getElementById("br").innerHTML = "arB: " + arBeta;
-			document.getElementById("gr").innerHTML = "arG: " + arGamma;
-			document.getElementById("a").innerHTML = "Alpha: " + alpha;
-			document.getElementById("b").innerHTML = "Beta: " + beta;
-			document.getElementById("g").innerHTML = "Gamma: " + gamma;
-	
-	        if (stabilize == 1) {
-				stabilize = 0;  // reset stabilization request
-			}   
-            
-            socket.emit('sendData', iosjson );            
-	    }
-	</script>
 
-	<!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
+            document.getElementById("x").innerHTML = "X: " + ax;
+            document.getElementById("y").innerHTML = "Y: " + ay;
+            document.getElementById("z").innerHTML = "Z: " + az;
+            document.getElementById("i").innerHTML = "I: " + ai;
+            document.getElementById("ar").innerHTML = "arA: " + arAlpha;
+            document.getElementById("br").innerHTML = "arB: " + arBeta;
+            document.getElementById("gr").innerHTML = "arG: " + arGamma;
+            document.getElementById("a").innerHTML = "Alpha: " + alpha;
+            document.getElementById("b").innerHTML = "Beta: " + beta;
+            document.getElementById("g").innerHTML = "Gamma: " + gamma;
+
+            if (stabilize == 1) {
+                stabilize = 0;  // reset stabilization request
+            }
+
+            socket.emit('sendData', iosjson );
+        }
+    </script>
+
+    <!--[if IE]><script language="javascript" type="text/javascript" src="./_js/excanvas.js"></script><![endif]-->
 </head>
 <body>
     <div id="header">
@@ -166,4 +166,4 @@
 </body>
 </html>
 
-    
+

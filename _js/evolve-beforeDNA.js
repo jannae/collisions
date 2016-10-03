@@ -22,14 +22,14 @@ socket.on('useradded', function(username, userdata){
     user = cleanStr(username);
     $.each(userdata, function(key, value){
         blobcol[key] = value;
-    });    
+    });
     color c = color(blobcol["r"],blobcol["g"],blobcol["b"]);
-        
-    world.born(random(cnvW),random(cnvH),c,username); 
+
+    world.born(random(cnvW),random(cnvH),c,username);
 });
 
 socket.on('update', function(username, userdata, data) {
-    user = cleanStr(username);    
+    user = cleanStr(username);
     divTxt  = "<p>Blob : " + user + "</p>";
     $.each(data, function(key, value){
         iosData[key] = parseFloat(value);
@@ -40,33 +40,33 @@ socket.on('update', function(username, userdata, data) {
         blobcol[key] = value;
     });
     $("#data-"+user).css("color","rgb("+blobcol['r']+","+blobcol['g']+","+blobcol['b']+")");
-}); 
+});
 
 void setup() {
     size(cnvW, cnvH);
     background(10);
-	world = new World(20, def);
-	smooth();
+  world = new World(20, def);
+  smooth();
 }
 
-void draw() { 
-	noStroke();
-	fill(10);
-	rect(0, 0, width*2, height*2);
-		
+void draw() {
+  noStroke();
+  fill(10);
+  rect(0, 0, width*2, height*2);
+
     socketData();
-    
+
     if(s == 1) {
         world.born(random(cnvW),random(cnvH),def,user);
         s = 0;
     }
-  
-	world.run();
+
+  world.run();
 }
 
 // We can add a creature manually if we so desire
 void mousePressed() {
-    world.born(mouseX,mouseY,def,'Blobby'); 
+    world.born(mouseX,mouseY,def,'Blobby');
 }
 
 // Evolution EcoSystem
@@ -81,7 +81,7 @@ class Blob {
   float xoff;       // For perlin noise
   float yoff;
   int kids;
-  
+
   // DNA will determine size and maxspeed
   float r,s,sw;
   float maxspeed;
@@ -96,9 +96,9 @@ class Blob {
     dna = dna_;
     name = n;
     kids = 0;
-    
+
     console.log(name+', '+user);
-    
+
     if(name != user) {
         xoff = random(1000);
         yoff = random(1000);
@@ -107,17 +107,17 @@ class Blob {
     // The bigger the blob, the slower it is
     maxspeed = map(dna.genes[0], 0, 1, 15, 0);
     r = map(dna.genes[0], 0, 1, 5, 50);
-	s = random(1,4);
-    
-    
-    
-    
+  s = random(1,4);
+
+
+
+
     //if the color isn't user-defined
     //if (c == def) {
     c = color(255*genes[1],255*genes[2],255*genes[3]);
-        //c = color(random(255),random(255),random(255));        
+        //c = color(random(255),random(255),random(255));
     //} else {
-        
+
     //}
     fcolor = c;
   }
@@ -132,21 +132,21 @@ class Blob {
   // A blob can find food and eat it
   void eat(Food f) {
     ArrayList<PVector> food = f.getFood();
-    
+
     // Are we touching any food objects?
     for (int i = food.size()-1; i >= 0; i--) {
       PVector foodloc = food.get(i);
       float d = PVector.dist(loc, foodloc);
-      
+
       // If we are, juice up our strength!
       if (d < r/2) {
-        health += 100; 
+        health += 100;
         food.remove(i);
       }
     }
   }
 
-  // At any moment there is a teeny, tiny chance a blob will reproduce  
+  // At any moment there is a teeny, tiny chance a blob will reproduce
   Blob reproduce(Blob mate) {
     //sexual reproduction
     if (random(1) < 0.0005) {
@@ -169,7 +169,7 @@ class Blob {
         childDNA.mutate(0.01);
         return new Blob(loc, childDNA, fcolor, name);
         console.log(name+' kid'+kids);
-    } 
+    }
     else {
         return null;
     }*/
@@ -183,13 +183,13 @@ class Blob {
     if(name == user){
         vx = nX;
         vy = nY;
-    } else { 
+    } else {
         vx = map(noise(xoff),0,1,-maxspeed,maxspeed);
         vy = map(noise(yoff),0,1,-maxspeed,maxspeed);
         xoff += 0.01;
         yoff += 0.01;
     }
-    
+
     PVector velocity = new PVector(vx,vy);
     loc.add(velocity);
 
@@ -208,7 +208,7 @@ class Blob {
   // Method to display
   void display() {
     ellipseMode(CENTER);
-	strokeWeight(s);
+  strokeWeight(s);
     stroke(255,health);
     fill(fcolor, health);
     ellipse(loc.x, loc.y, r, r);
@@ -222,24 +222,24 @@ class Blob {
     fill(10);
     ellipse(loc.x-(r/7), loc.y-(r/12), r/4, r/5);
     ellipse(loc.x+(r/7), loc.y-(r/12), r/4, r/5);
-    
+
     fill(fcolor, health);
     if(name != 'sys') {
-        text(name, loc.x-(r/2), loc.y-r) 
+        text(name, loc.x-(r/2), loc.y-r)
     }
   }
-  
+
   // Death
   boolean dead() {
     if (health < 0.0) {
       return true;
       socket.emit('kill', name);
-    } 
+    }
     else {
       return false;
     }
   }
-  
+
     ArrayList getBlobs() {
     return food;
   }
@@ -256,7 +256,7 @@ class DNA {
     // The genetic sequence
     float[] genes;
     float fitness;
-    
+
     // Constructor (makes a random DNA)
     DNA() {
         // DNA is random floating point values between 0 and 1 (!!)
@@ -265,24 +265,24 @@ class DNA {
           genes[i] = random(0,1);
         }
     }
-    
+
     DNA(float[] newgenes) {
         genes = newgenes;
     }
-    
+
     void fitness() {
         int score = 0;
-        for (int i = 0; i < genes.length; i++) { 
+        for (int i = 0; i < genes.length; i++) {
             //what is making these blobs "fit"??
         }
     }
-  
+
     DNA copy() {
         float[] newgenes = new float[genes.length];
         arrayCopy(genes,newgenes);
         return new DNA(newgenes);
     }
-  
+
     DNA crossover(DNA mate) {
         float[] newgenes = new float[genes.length];
         int midpoint = int(random(genes.length));
@@ -295,7 +295,7 @@ class DNA {
         }
         return new DNA(newgenes);
     }
-  
+
   // Based on a mutation probability, picks a new random character in array spots
   void mutate(float m) {
     for (int i = 0; i < genes.length; i++) {
@@ -313,20 +313,20 @@ class DNA {
 
 class Food {
   ArrayList<PVector> food;
- 
+
   Food(int num) {
     // Start with some food
     food = new ArrayList();
     for (int i = 0; i < num; i++) {
-       food.add(new PVector(random(width),random(height))); 
+       food.add(new PVector(random(width),random(height)));
     }
-  } 
-  
+  }
+
   // Add some food at a loc
   void add(PVector l) {
-     food.add(l.get()); 
+     food.add(l.get());
   }
-  
+
   // Display the food
   void run() {
     for (PVector f : food) {
@@ -334,14 +334,14 @@ class Food {
        stroke(255);
        fill(175);
        rect(f.x,f.y,8,8);
-    } 
-    
+    }
+
     // There's a small chance food will appear randomly
     if (random(1) < 0.001) {
-       food.add(new PVector(random(width),random(height))); 
+       food.add(new PVector(random(width),random(height)));
     }
   }
-  
+
   // Return the list of food
   ArrayList getFood() {
     return food;
@@ -370,7 +370,7 @@ class World {
       blobs.add(new Blob(l,dna,c,'sys'));
     }
   }
-  
+
   // Make a new creature
   void born(float x, float y, color col, String nm) {
     PVector l = new PVector(x,y);
@@ -382,7 +382,7 @@ class World {
   void run() {
     // Deal with food
     food.run();
-    
+
     // Cycle through the ArrayList backwards b/c we are deleting
     for (int i = blobs.size()-1; i >= 0; i--) {
       // All blobs run and eat
@@ -391,7 +391,7 @@ class World {
       for (int j = blobs.size()-1; j >= 0; j--) {
           Blob m = blobs.get(j);
           float d = PVector.dist(b.loc, m.loc);
-          
+
           if (d < b.r/2 && b != m) {
             Blob child = b.reproduce(m);
             if (child != null) blobs.add(child);
@@ -406,38 +406,38 @@ class World {
       }
       // Asexual, random reproduction
       //Blob child = b.reproduce();
-      
-      //if (child != null) blobs.add(child);     
+
+      //if (child != null) blobs.add(child);
     }
   }
-  
+
   // Return the list of other blobs
   ArrayList getBlobs() {
     return blobs;
   }
-} 
+}
 
 
 // getting/setting all the data from the socket connection
 void socketData() {
-	
+
     nX = iosData['x'];
     nY = iosData['y'];
     nZ = iosData['z'];
     //r = abs(nZ)*10;  // possibly for 3D effect?
-    
+
     gA = iosData['a'];
     gB = iosData['b'];
     gG = iosData['g'];
-    
+
     arA = iosData['ar'] / 100;
     arB = iosData['br'] / 100;
     arG = iosData['gr'] / 100;
-    
+
     s = int(iosData['s']);
 }
 
-/* notes for later, gator: 
-	http://ditio.net/2008/11/04/php-string-to-hex-and-hex-to-string-functions/
-	http://www.html5rocks.com/en/mobile/touch/
+/* notes for later, gator:
+  http://ditio.net/2008/11/04/php-string-to-hex-and-hex-to-string-functions/
+  http://www.html5rocks.com/en/mobile/touch/
 */
